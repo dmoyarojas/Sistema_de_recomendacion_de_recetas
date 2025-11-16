@@ -16,29 +16,47 @@ interface Ingrediente {
 }
 
 const SUGGESTED_INGREDIENTS = [
-  "Pollo", "Arroz", "Tomate", "Cebolla", "Ajo",
-  "Pasta", "Queso", "Huevos", "Papas", "Zanahoria",
-  "Limón", "Aceite de oliva", "Sal", "Pimienta"
+  "Pollo",
+  "Arroz",
+  "Tomate",
+  "Cebolla",
+  "Ajo",
+  "Pasta",
+  "Queso",
+  "Huevos",
+  "Papas",
+  "Zanahoria",
+  "Limón",
+  "Aceite de oliva",
+  "Sal",
+  "Pimienta",
 ];
 
-export function IngredientsInput({ onSearch, initialIngredients = [] }: IngredientsInputProps) {
+export function IngredientsInput({
+  onSearch,
+  initialIngredients = [],
+}: IngredientsInputProps) {
   const [ingredients, setIngredients] = useState<string[]>(initialIngredients);
   const [inputValue, setInputValue] = useState("");
   const [todosIngredientes, setTodosIngredientes] = useState<Ingrediente[]>([]);
-  const [ingredientesFiltrados, setIngredientesFiltrados] = useState<Ingrediente[]>([]);
-//carga de ingredientes de la API
- useEffect(() => {
-    fetch('http://localhost:8000/api/ingredientes/')
-      .then(res => res.json())
-      .then(data => setTodosIngredientes(data))
-      .catch(error => console.error('Error:', error));
+  const [ingredientesFiltrados, setIngredientesFiltrados] = useState<
+    Ingrediente[]
+  >([]);
+  const [loading, setLoading] = useState(false);
+  //carga de ingredientes de la API
+  useEffect(() => {
+    fetch("http://localhost:8000/api/ingredientes/")
+      .then((res) => res.json())
+      .then((data) => setTodosIngredientes(data))
+      .catch((error) => console.error("Error:", error));
   }, []);
-//filtro de ingredientes de la API
+  //filtro de ingredientes de la API
   useEffect(() => {
     if (inputValue.trim()) {
-      const filtrados = todosIngredientes.filter(ing =>
-        ing.nombre.toLowerCase().includes(inputValue.toLowerCase()) &&
-        !ingredients.includes(ing.nombre)
+      const filtrados = todosIngredientes.filter(
+        (ing) =>
+          ing.nombre.toLowerCase().includes(inputValue.toLowerCase()) &&
+          !ingredients.includes(ing.nombre)
       );
       setIngredientesFiltrados(filtrados);
     } else {
@@ -46,6 +64,19 @@ export function IngredientsInput({ onSearch, initialIngredients = [] }: Ingredie
     }
   }, [inputValue, todosIngredientes, ingredients]);
 
+  const obtenerRecomendacionesPorNombres = async (ingredientes: string[]) => {
+    const response = await fetch(
+      "http://localhost:8000/api/recomendaciones/nombres/",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ingredientes }),
+      }
+    );
+    if (!response.ok) throw new Error("Error al obtener recomendaciones");
+    const data = await response.json();
+    return data.recomendaciones;
+  };
 
   const addIngredient = (ingredient: string) => {
     const trimmed = ingredient.trim();
@@ -59,7 +90,7 @@ export function IngredientsInput({ onSearch, initialIngredients = [] }: Ingredie
   const removeIngredient = (ingredient: string) => {
     setIngredients(ingredients.filter((i) => i !== ingredient));
   };
-  
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -71,14 +102,25 @@ export function IngredientsInput({ onSearch, initialIngredients = [] }: Ingredie
     }
   };
 
-  const handleSearch = () => {
-    if (ingredients.length > 0) {
-      onSearch(ingredients);
+
+  const handleSearch = async () => {
+    if (ingredients.length === 0) return;
+    setLoading(true);
+    try {
+      const recomendaciones = await obtenerRecomendacionesPorNombres(
+        ingredients
+      );
+      onSearch(recomendaciones);
+    } catch (error) {
+      console.error("Error al obtener las recomendaciones:", error);
+      alert("Error al buscar recetas. Por favor, intenta de nuevo.");
+    } finally {
+      setLoading(false);
     }
   };
-    //ingredientes sugeridos desde la API
-    const ingredientesSugeridos = todosIngredientes
-    .filter(ing => !ingredients.includes(ing.nombre))
+  //ingredientes sugeridos desde la API
+  const ingredientesSugeridos = todosIngredientes
+    .filter((ing) => !ingredients.includes(ing.nombre))
     .slice(0, 14);
 
   return (
@@ -91,11 +133,14 @@ export function IngredientsInput({ onSearch, initialIngredients = [] }: Ingredie
         >
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm">
             <Sparkles className="h-4 w-4 text-[#e87c3e]" />
-            <span className="text-sm text-gray-600">Paso 1: Ingresa tus ingredientes</span>
+            <span className="text-sm text-gray-600">
+              Paso 1: Ingresa tus ingredientes
+            </span>
           </div>
           <h1 className="mb-4 text-gray-900">¿Qué tienes en tu cocina?</h1>
           <p className="text-lg text-gray-600">
-            Agrega los ingredientes que tienes disponibles y te mostraremos recetas perfectas para ti
+            Agrega los ingredientes que tienes disponibles y te mostraremos
+            recetas perfectas para ti
           </p>
         </motion.div>
 
@@ -120,7 +165,7 @@ export function IngredientsInput({ onSearch, initialIngredients = [] }: Ingredie
                   onKeyPress={handleKeyPress}
                   className="w-full rounded-xl border-gray-200 px-4 py-6 focus:border-[#e87c3e] focus:ring-[#e87c3e]"
                 />
-                
+
                 {/* Dropdown de sugerencias */}
                 {inputValue && ingredientesFiltrados.length > 0 && (
                   <motion.div
@@ -216,7 +261,26 @@ export function IngredientsInput({ onSearch, initialIngredients = [] }: Ingredie
             className="w-full rounded-xl bg-gradient-to-r from-[#e87c3e] to-[#e76f51] py-6 text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50"
           >
             <Search className="mr-2 h-5 w-5" />
-            Buscar recetas ({ingredients.length} {ingredients.length === 1 ? 'ingrediente' : 'ingredientes'})
+            Buscar recetas ({ingredients.length}{" "}
+            {ingredients.length === 1 ? "ingrediente" : "ingredientes"})
+          </Button>
+          <Button
+            onClick={handleSearch}
+            disabled={ingredients.length === 0 || loading}
+            className="w-full rounded-xl bg-gradient-to-r from-[#e87c3e] to-[#e76f51] py-6 text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Buscando recetas...
+              </>
+            ) : (
+              <>
+                <Search className="mr-2 h-5 w-5" />
+                Buscar recetas ({ingredients.length}{" "}
+                {ingredients.length === 1 ? "ingrediente" : "ingredientes"})
+              </>
+            )}
           </Button>
         </motion.div>
 
@@ -228,7 +292,8 @@ export function IngredientsInput({ onSearch, initialIngredients = [] }: Ingredie
           className="mt-8 text-center"
         >
           <p className="text-sm text-gray-500">
-            💡 Tip: Cuantos más ingredientes agregues, más opciones de recetas encontrarás
+            💡 Tip: Cuantos más ingredientes agregues, más opciones de recetas
+            encontrarás
           </p>
         </motion.div>
       </div>

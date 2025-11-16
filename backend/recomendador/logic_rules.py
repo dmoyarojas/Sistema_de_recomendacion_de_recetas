@@ -1,6 +1,6 @@
 from .models import Receta, Ingrediente
 from .processor import calculate_overlap_score
-from pydatalog import pyDatalog
+from pyDatalog import pyDatalog
 #import de pydatalog
 #importacion de modelos y funcion de calculo de puntuacion
 

@@ -16,7 +16,7 @@ class RecetaIngredienteSerializer(serializers.ModelSerializer):
         fields = ['ingrediente', 'cantidad_requerida']
 
 class RecetaSerializer(serializers.ModelSerializer):
-    # Esto mostrará los ingredientes con sus cantidades
+    #  los ingredientes x sus cantidades
     recetaingrediente_set = RecetaIngredienteSerializer(many=True, read_only=True)
     
     class Meta:
