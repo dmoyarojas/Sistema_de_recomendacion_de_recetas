@@ -30,7 +30,7 @@ interface ApiReceta {
 type UIRecipe = {
   id: string;
   name: string;
-  description: string;
+  description: string;  
   image?: string;
   time?: string;
   servings?: number;
@@ -52,6 +52,10 @@ export default function App() {
   const [apiRecetas, setApiRecetas] = useState<ApiReceta[] | null>(null);
   const [apiIngredientes, setApiIngredientes] = useState<any[] | null>(null);
 
+
+
+
+
   // Fetch ingredientes desde la API
   useEffect(() => {
     fetch("http://localhost:8000/api/ingredientes/")
@@ -62,6 +66,8 @@ export default function App() {
       })
       .catch((error) => console.error("Error:", error));
   }, []);
+
+
 
   // Fetch recetas desde la API
   useEffect(() => {
@@ -92,6 +98,8 @@ export default function App() {
     return data.recomendaciones;
   };
 
+
+  
   // Mapea ApiReceta -> UIRecipe
   const mapApiRecetaToUI = (r: ApiReceta): UIRecipe => {
     return {
@@ -108,32 +116,43 @@ export default function App() {
     };
   };
 
+
+
+
   // Buscar recetas según ingredientes seleccionados (sin porcentaje)
-  const handleSearch = (ingredients: string[]) => {
+
+const handleSearch = async (ingredientsOrRecommendations: string[] | ApiReceta[]) => {
+  
+  if (typeof ingredientsOrRecommendations[0] === 'string') {
+    const ingredients = ingredientsOrRecommendations as string[];
     setSelectedIngredients(ingredients);
 
-    if (!apiRecetas) {
+    try {
+   
+      const recomendaciones = await obtenerRecomendacionesPorNombres(ingredients);
+      console.log('Recomendaciones recibidas:', recomendaciones);
+      
+      
+      const uiRecipes = recomendaciones.map(mapApiRecetaToUI);
+      setFilteredRecipes(uiRecipes);
+      setCurrentView("recipes");
+    } catch (error) {
+      console.error('Error al obtener recomendaciones:', error);
       setFilteredRecipes([]);
       setCurrentView("recipes");
-      return;
     }
-
-    const uiRecipes = apiRecetas.map(mapApiRecetaToUI);
-
-    // Filtra recetas que contengan al menos uno de los ingredientes buscados
-    const filtered = uiRecipes.filter((recipe) =>
-      recipe.ingredients.some((ing) =>
-        ingredients.some(
-          (sel) =>
-            ing.toLowerCase().includes(sel.toLowerCase()) ||
-            sel.toLowerCase().includes(ing.toLowerCase())
-        )
-      )
-    );
-
-    setFilteredRecipes(filtered);
+  } 
+ 
+  else {
+    const recomendaciones = ingredientsOrRecommendations as ApiReceta[];
+    const uiRecipes = recomendaciones.map(mapApiRecetaToUI);
+    setFilteredRecipes(uiRecipes);
     setCurrentView("recipes");
-  };
+  }
+};
+
+
+
 
   const handleViewRecipe = (recipeId: string) => {
     // Primero intenta buscar en las recetas filtradas, luego en todas las recetas mapeadas
@@ -148,6 +167,9 @@ export default function App() {
     }
   };
 
+
+
+
   const handleNavigate = (view: string) => {
     if (view === "home") {
       setCurrentView("home");
@@ -157,6 +179,8 @@ export default function App() {
       setCurrentView("ingredients");
     }
   };
+
+
 
   const popularRecipes = (apiRecetas || []).slice(0, 3).map(mapApiRecetaToUI);
 

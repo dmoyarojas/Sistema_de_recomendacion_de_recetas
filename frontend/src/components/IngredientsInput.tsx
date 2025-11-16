@@ -64,19 +64,36 @@ export function IngredientsInput({
     }
   }, [inputValue, todosIngredientes, ingredients]);
 
-  const obtenerRecomendacionesPorNombres = async (ingredientes: string[]) => {
-    const response = await fetch(
-      "http://localhost:8000/api/recomendaciones/nombres/",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ingredientes }),
-      }
-    );
-    if (!response.ok) throw new Error("Error al obtener recomendaciones");
-    const data = await response.json();
-    return data.recomendaciones;
-  };
+
+
+
+//funcion para obtener recomendaciones por nombres
+const obtenerRecomendacionesPorNombres = async (ingredientes: string[]) => {
+  console.log('Haciendo petición con:', ingredientes);
+  
+  const response = await fetch('http://localhost:8000/api/recomendaciones/nombres/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      ingredientes: ingredientes
+    })
+  });
+
+  console.log('Status de respuesta:', response.status);
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error('Error de la API:', errorData);
+    throw new Error(errorData.error || 'Error al obtener recomendaciones');
+  }
+
+  const data = await response.json();
+  console.log('Datos recibidos:', data);
+  
+  return data.recomendaciones;
+};
 
   const addIngredient = (ingredient: string) => {
     const trimmed = ingredient.trim();
@@ -103,21 +120,30 @@ export function IngredientsInput({
   };
 
 
-  const handleSearch = async () => {
-    if (ingredients.length === 0) return;
+const handleSearch = async () => {
+  if (ingredients.length > 0) {
     setLoading(true);
     try {
-      const recomendaciones = await obtenerRecomendacionesPorNombres(
-        ingredients
-      );
+      console.log('Enviando ingredientes:', ingredients);
+      
+      const recomendaciones = await obtenerRecomendacionesPorNombres(ingredients);
+      
+      console.log('Recomendaciones recibidas:', recomendaciones);
       onSearch(recomendaciones);
     } catch (error) {
-      console.error("Error al obtener las recomendaciones:", error);
-      alert("Error al buscar recetas. Por favor, intenta de nuevo.");
+      console.error('Error completo:', error);
+      
+      
+      if (error instanceof Error) {
+        alert(`Error: ${error.message}`);
+      } else {
+        alert('Error al buscar recetas. Por favor, intenta de nuevo.');
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }
+};
   //ingredientes sugeridos desde la API
   const ingredientesSugeridos = todosIngredientes
     .filter((ing) => !ingredients.includes(ing.nombre))
