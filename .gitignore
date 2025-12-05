@@ -23,3 +23,5 @@ ENV/
 *.swp
 *.swo
 backend/.env
+
+db.sqlite3
