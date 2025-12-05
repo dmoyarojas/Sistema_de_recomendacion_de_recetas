@@ -1,7 +1,7 @@
 node_modules/
 .next/
 out/
-build/
+
 dist/
 
 __pycache__/
