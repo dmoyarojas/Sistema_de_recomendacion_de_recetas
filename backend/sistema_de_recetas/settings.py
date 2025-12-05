@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-y^-#k)&&1_xh@lrtoiapr_+%3%o&@2^%vxy+idf@v^pt+!o^04'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 
 # Application definition
@@ -119,15 +119,26 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+if not DEBUG:
+    # 1. Asegura el STATIC_ROOT para collectstatic
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    
+    # 2. Permite que WhiteNoise sirva los archivos comprimidos/cacheados
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    
+    # 3. Añade la ruta del frontend de React (si construyes el frontend en el backend)
+    # Esto es opcional si solo usas la API, pero es buena práctica si mezclas estáticos
+    # El archivo de configuración de WhiteNoise no debe estar vacío.
+    
+    # WhiteNoise buscará archivos estáticos aquí:
+    WHITENOISE_ROOT = STATIC_ROOT # Si usas WhiteNoise para servir cosas complejas
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
-
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')  
