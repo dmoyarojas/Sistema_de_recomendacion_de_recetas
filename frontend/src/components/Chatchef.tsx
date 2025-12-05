@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Send, ChefHat } from "lucide-react";
-
+import { API_BASE_URL } from "../config";
 interface Mensaje {
   role: 'user' | 'assistant';
   content: string;
@@ -32,7 +32,7 @@ export function Chatchef() {
         content: m.content
       }));
 
-      const response = await fetch('http://localhost:8000/api/chat-chef/', {
+      const response = await fetch(`${API_BASE_URL}/api/recetas/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

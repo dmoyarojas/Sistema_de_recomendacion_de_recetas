@@ -60,7 +60,7 @@ export default function App() {
 
   // Fetch ingredientes desde la API
   useEffect(() => {
-    fetch("http://localhost:8000/api/ingredientes/")
+    fetch(`${API_BASE_URL}/api/recetas/`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Ingredientes:", data);
@@ -73,7 +73,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
   // Fetch recetas desde la API
   useEffect(() => {
-    fetch("http://localhost:8000/api/recetas/")
+    fetch(`${API_BASE_URL}/api/recetas/`)
       .then((res) => res.json())
       .then((data: ApiReceta[]) => {
         console.log("Recetas (API):", data);
@@ -84,7 +84,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 
   const obtenerRecomendacionesPorNombres = async (ingredientes: string[]) => {
-    const response = await fetch('http://localhost:8000/api/recomendaciones/nombres/', {
+    const response = await fetch(`${API_BASE_URL}/api/recetas/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

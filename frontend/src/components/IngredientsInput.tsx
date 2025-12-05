@@ -4,7 +4,7 @@ import { Plus, X, Search, Sparkles } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-
+import { API_BASE_URL } from "../config";
 interface IngredientsInputProps {
   onSearch: (ingredients: string[]) => void;
   initialIngredients?: string[];
@@ -45,7 +45,7 @@ export function IngredientsInput({
   const [loading, setLoading] = useState(false);
   //carga de ingredientes de la API
   useEffect(() => {
-    fetch("${API_BASE_URL}/api/ingredientes/")
+    fetch(`${API_BASE_URL}/api/recetas/`)
       .then((res) => res.json())
       .then((data) => setTodosIngredientes(data))
       .catch((error) => console.error("Error:", error));
@@ -71,7 +71,7 @@ export function IngredientsInput({
 const obtenerRecomendacionesPorNombres = async (ingredientes: string[]) => {
   console.log('Haciendo petición con:', ingredientes);
   
-  const response = await fetch('${API_BASE_URL}/api/recomendaciones/nombres/', {
+  const response = await fetch(`${API_BASE_URL}/api/recetas/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
