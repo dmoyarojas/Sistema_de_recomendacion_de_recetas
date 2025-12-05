@@ -32,7 +32,7 @@ export function Chatchef() {
         content: m.content
       }));
 
-      const response = await fetch(`${API_BASE_URL}/api/recetas/`, {
+      const response = await fetch(`${API_BASE_URL}/api/chat-chef/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
