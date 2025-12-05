@@ -45,7 +45,7 @@ export function IngredientsInput({
   const [loading, setLoading] = useState(false);
   //carga de ingredientes de la API
   useEffect(() => {
-    fetch("http://localhost:8000/api/ingredientes/")
+    fetch("${API_BASE_URL}/api/ingredientes/")
       .then((res) => res.json())
       .then((data) => setTodosIngredientes(data))
       .catch((error) => console.error("Error:", error));
@@ -71,7 +71,7 @@ export function IngredientsInput({
 const obtenerRecomendacionesPorNombres = async (ingredientes: string[]) => {
   console.log('Haciendo petición con:', ingredientes);
   
-  const response = await fetch('http://localhost:8000/api/recomendaciones/nombres/', {
+  const response = await fetch('${API_BASE_URL}/api/recomendaciones/nombres/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
