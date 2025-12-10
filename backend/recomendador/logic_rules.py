@@ -3,19 +3,12 @@ from .processor import calculate_overlap_score
 from pyDatalog import pyDatalog
 
 # --- INCLUSIÓN VISIBLE DEL PARADIGMA LÓGICO ---
-# Definición de términos (Variables Lógicas)
+
 pyDatalog.create_terms('recomendable, receta_score, R, S') 
 
 MIN_SCORE_THRESHOLD = 0.50
 
-# 2. DEFINICIÓN DE LA REGLA LÓGICA (Simulación del 50%)
-# NOTA: Esta línea DEBE permanecer COMENTADA para evitar el error de incompatibilidad 
-# con tu versión de pyDatalog (v0.17.4) y Python.
 
-# La regla que se buscaba era: recomendable[R] <= receta_score[R, S], S._ge(MIN_SCORE_THRESHOLD)
-
-# Aquí puedes dejar la regla como una cadena de texto para mostrarla
-# al profesor sin que el código crashee al ejecutarla:
 REGLA_LOGICA_50_PERCENT = "recomendable(R) :- receta_score(R, S), S >= 0.50"
 
 
