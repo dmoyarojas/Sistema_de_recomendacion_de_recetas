@@ -60,7 +60,7 @@ export default function App() {
 
   // Fetch ingredientes desde la API
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/recetas/`)
+    fetch(`${API_BASE_URL}/api/ingredientes/`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Ingredientes:", data);

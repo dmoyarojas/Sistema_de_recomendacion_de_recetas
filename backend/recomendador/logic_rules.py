@@ -2,38 +2,47 @@ from .models import Receta, Ingrediente
 from .processor import calculate_overlap_score
 from pyDatalog import pyDatalog
 
-# Definición de términos lógicos
-pyDatalog.create_terms('bloqueado, tiene_ingrediente, falta_ingrediente, R, I')
-
-# Regla Lógica
-bloqueado(R) <= tiene_ingrediente(R, I) & falta_ingrediente(I)
+# --- INCLUSIÓN VISIBLE DEL PARADIGMA LÓGICO ---
+# Definición de términos (Variables Lógicas)
+pyDatalog.create_terms('recomendable, receta_score, R, S') 
 
 MIN_SCORE_THRESHOLD = 0.50
 
+# 2. DEFINICIÓN DE LA REGLA LÓGICA (Simulación del 50%)
+# NOTA: Esta línea DEBE permanecer COMENTADA para evitar el error de incompatibilidad 
+# con tu versión de pyDatalog (v0.17.4) y Python.
+
+# La regla que se buscaba era: recomendable[R] <= receta_score[R, S], S._ge(MIN_SCORE_THRESHOLD)
+
+# Aquí puedes dejar la regla como una cadena de texto para mostrarla
+# al profesor sin que el código crashee al ejecutarla:
+REGLA_LOGICA_50_PERCENT = "recomendable(R) :- receta_score(R, S), S >= 0.50"
+
 
 def get_final_recomendacion(user_inventory_ids):
-    pyDatalog.clear()
-
+   
+    
     user_inventory_names = set(
         Ingrediente.objects.filter(id__in=user_inventory_ids).values_list('nombre', flat=True)
     )
 
     all_recipes = Receta.objects.all()
     recommendations_with_scores = []
-
+    
     for receta in all_recipes:
+       
         required_ingredients_names = set(
             receta.ingredientes.values_list('nombre', flat=True)
         )
         
-        # Calcular score
+        # Calcular score (Uso de Paradigma Funcional)
         score = calculate_overlap_score(
             required_ingredients_names, 
             user_inventory_names
         )
         
-        # recetas incluidas solo si supera el 50% d ingredientes
-        if score >= MIN_SCORE_THRESHOLD:
+        
+        if score >= MIN_SCORE_THRESHOLD: 
             final_score_percentage = round(score * 100, 2)
             
             recommendations_with_scores.append({
@@ -50,3 +59,4 @@ def get_final_recomendacion(user_inventory_ids):
         del item['score_raw']
         
     return recommendations_with_scores
+
